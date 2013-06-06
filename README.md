@@ -1,3 +1,5 @@
+-*- mode: markdown; coding: utf-8-unix; -*-
+
 CL-MOCK - Mocking (generic) functions.
 
 Copyright (C) 2013 Olof-Joachim Frahm
