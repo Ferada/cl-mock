@@ -11,9 +11,13 @@
 (defvar *arguments*)
 
 (defun call-previous (&rest args)
+  "Invokes the previous binding either with the current arguments or with
+the given ones.  Use *PREVIOUS*/*ARGUMENTS* directly in edge cases."
   (apply *previous* (or args *arguments*)))
 
 (defun find-and-invoke-mock (*previous* cases *arguments*)
+  "Looks for a compatible mock (i.e. calls the TEST until one returns true)
+and executes it.  If no mock was found, no values are returned instead."
   (dolist (case cases (values))
     (when (ignore-errors (apply (car case) *arguments*))
       (return (apply (cdr case) *arguments*)))))
@@ -41,6 +45,8 @@ be recorded and returned as the second return value, else NIL."
      previous)))
 
 (defun register-mock (mock-bindings name)
+  "Registers a mocked function under NAME.  The mocked function will
+return no values.  See IF-CALLED to add some behaviour to it."
   (let ((found (member name (mock-bindings-mocks mock-bindings) :key #'car :test #'eq)))
     (or (car found)
         (let ((binding (list name)))
@@ -48,6 +54,9 @@ be recorded and returned as the second return value, else NIL."
           binding))))
 
 (defun if-called (mock-bindings name test function &key at-start)
+  "Registers a new binding to be called when the TEST function returns
+true.  If AT-START is set, the binding is put at the start of the bindings
+list instead.  Calls REGISTER-MOCK automatically."
   (let ((binding (register-mock mock-bindings name))
         (case (cons test function)))
     (if at-start
