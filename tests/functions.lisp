@@ -4,6 +4,10 @@
 
 (in-suite cl-mock)
 
+(def-test progf.calls-binding ()
+  (progf '(foo) (list (lambda () 23))
+    (is (eql 23 (foo)))))
+
 (def-test dflet.calls-binding ()
   (dflet ((foo () 23))
     (is (eql 23 (foo)))))

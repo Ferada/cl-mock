@@ -5,6 +5,7 @@
 (defpackage #:cl-mock
   (:use #:closer-common-lisp #:alexandria)
   (:export ;;; regular functions
+           #:progf
            #:dflet
 
            ;;; mocking of regular functions
