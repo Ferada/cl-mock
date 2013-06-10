@@ -2,6 +2,8 @@
 
 (in-package #:cl-mock-tests)
 
+(in-suite cl-mock)
+
 (def-test dflet.calls-binding ()
   (dflet ((foo () 23))
     (is (eql 23 (foo)))))

@@ -2,7 +2,7 @@
 
 (in-package #:cl-mock-tests)
 
-(import 'cl-mock::(progm))
+(in-suite cl-mock)
 
 (defclass foo ()
   ())

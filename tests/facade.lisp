@@ -2,7 +2,7 @@
 
 (in-package #:cl-mock-tests)
 
-(import 'cl-mock::(call-with-mocks make-mock-bindings register-mock if-called when-called call-previous))
+(in-suite cl-mock)
 
 (def-test call-with-mocks.empty ()
   (is (eq T (call-with-mocks
