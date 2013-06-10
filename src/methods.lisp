@@ -55,21 +55,20 @@
 (defmacro progm* (methods values &body body)
   `(call-with-method-bindings* ,methods ,values (lambda () ,@body)))
 
+(defun classify (specializer)
+  (if (classp specializer)
+      specializer
+      (find-class specializer)))
+
 (defun call-with-method-bindings (methods values function
                                   &optional previous)
   (let ((methods
           (mapcar (lambda (method)
                     (destructuring-bind (generic-function qualifiers specializers) method
                       (list
-                       (if (functionp generic-function)
-                           generic-function
-                           (fdefinition generic-function))
+                       (ensure-function generic-function)
                        qualifiers
-                       (mapcar (lambda (specializer)
-                                 (if (classp specializer)
-                                     specializer
-                                     (find-class specializer)))
-                               specializers))))
+                       (mapcar #'classify specializers))))
                   methods)))
     (call-with-method-bindings* methods values function (or previous (find-methods methods)))))
 

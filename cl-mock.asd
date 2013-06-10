@@ -7,7 +7,7 @@
   :description "Mocking (generic) functions."
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
   :license "Simplified BSD License"
-  :depends-on (#:closer-mop)
+  :depends-on (#:closer-mop #:alexandria)
   :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests)))
   :perform (asdf:test-op :after (op c)
              (funcall (find-symbol (symbol-name '#:run!) '#:fiveam)
