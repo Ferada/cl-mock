@@ -32,7 +32,8 @@ interest.
     > => 23
     > (OR) => 42, if FOO was inlined
 
-The caveat is that this might not work on certain optimization settings.
+The caveat is that this might not work on certain optimization settings,
+including inlining.
 
 The underlying function `PROGF` may be used as well similarly to standard
 `PROG`:
@@ -41,5 +42,6 @@ The underlying function `PROGF` may be used as well similarly to standard
     >   (bar))
     > => 23
     > (OR) => 42, if FOO was inlined
+
 
 [1]: http://common-lisp.net/project/closer/closer-mop.html
