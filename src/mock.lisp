@@ -1,10 +1,11 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
 
 (in-package #:cl-mock)
-
+
 ;;; mocking of regular functions
 
 (defstruct mock-bindings
+  "Contains a set of mocked functions and their behaviour."
   mocks)
 
 (defvar *previous*)
@@ -28,21 +29,21 @@ its first return value, if any.  If RECORDP is set, all invocations will
 be recorded and returned as the second return value, else NIL."
   (let* ((mocks (mock-bindings-mocks mock-bindings))
          (functions (mapcar #'car mocks))
-         (previous (mapcar #'maybe-fdefinition functions))
-         invocations)
-    (call-with-function-bindings
-     functions
-     (mapcar (lambda (binding previous &aux (name (car binding)) (cases (cdr binding)))
-               (lambda (&rest args)
-                 (when recordp
-                   (push (cons name args) invocations))
-                 (find-and-invoke-mock previous cases args)))
-             mocks previous)
-     (lambda ()
-       (values
-        (funcall function)
-        (nreverse invocations)))
-     previous)))
+         (previous (mapcar #'maybe-fdefinition functions)))
+    (with-collector (invocations)
+      (call-with-function-bindings
+       functions
+       (mapcar (lambda (binding previous &aux (name (car binding)) (cases (cdr binding)))
+                 (lambda (&rest args)
+                   (when recordp
+                     (invocations (cons name args)))
+                   (find-and-invoke-mock previous cases args)))
+               mocks previous)
+       (lambda ()
+         (values
+          (funcall function)
+          (invocations)))
+       previous))))
 
 (defun register-mock (mock-bindings name)
   "Registers a mocked function under NAME.  The mocked function will

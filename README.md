@@ -19,6 +19,32 @@ e.g. dynamic `FLET` and method bindings with `PROGM` may be of general
 interest.
 
 
+# GENERIC FUNCTIONS
+
+Since behaviour isn't bound to classes, but to generic functions,
+creating new classes on the fly isn't particularly interesting.
+
+We provide the form `PROGM` to bind a number of methods during the
+execution of its contained body:
+
+    > (progm
+    >     '((baz NIL (list)))
+    >     '((lambda (list) list))
+    >   ...)
+
+For example:
+
+    > (defclass foo () ())
+    > (defgeneric baz (foo)
+        (:method ((foo foo))
+          42))
+    > (progm '((baz NIL (list)))
+             '((lambda (list) list))
+        (values (baz (make-instance 'foo)) (baz '(1 2 3))))
+    > => 42
+    > => (1 2 3)
+
+
 # UTILITIES
 
 `DFLET` dynamically rebinds functions similar to `FLET`:
@@ -42,6 +68,5 @@ The underlying function `PROGF` may be used as well similarly to standard
     >   (bar))
     > => 23
     > (OR) => 42, if FOO was inlined
-
 
 [1]: http://common-lisp.net/project/closer/closer-mop.html

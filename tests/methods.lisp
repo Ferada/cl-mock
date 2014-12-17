@@ -1,7 +1,7 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock-tests; -*-
 
 (in-package #:cl-mock-tests)
-
+
 (in-suite cl-mock)
 
 (defclass foo ()
@@ -16,5 +16,12 @@
       '((baz NIL (list)))
       '((lambda (list) list))
     (is (equal '(1 2 3) (baz '(1 2 3))))
-    (signals error (equal T (baz T)))
-    (is (equal 42 (baz (make-instance 'foo))))))
+    (signals error (eq T (baz T)))
+    (is (eql 42 (baz (make-instance 'foo))))))
+
+(def-test gf.overwrite ()
+  (progm
+      '((baz NIL (foo)))
+      '((lambda (foo) 23))
+    (is (eql 23 (baz (make-instance 'foo)))))
+  (is (eql 42 (baz (make-instance 'foo)))))

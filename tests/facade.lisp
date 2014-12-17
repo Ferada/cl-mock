@@ -1,7 +1,7 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock-tests; -*-
 
 (in-package #:cl-mock-tests)
-
+
 (in-suite cl-mock)
 
 (def-test call-with-mocks.empty ()

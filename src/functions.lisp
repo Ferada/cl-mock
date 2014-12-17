@@ -1,7 +1,7 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
 
 (in-package #:cl-mock)
-
+
 ;;; dynamic rebinding of functions
 
 (defun maybe-fdefinition (name)

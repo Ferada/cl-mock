@@ -1,7 +1,7 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
 
 (in-package #:cl-mock)
-
+
 ;;; syntactic sugar for defining the mock interactions
 
 (defun make-lambda-pattern (literal-pattern)

@@ -1,7 +1,7 @@
 ;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
 
 (in-package #:cl-mock)
-
+
 ;;; mocking of generic methods and objects
 
 (defun find-methods (methods)
