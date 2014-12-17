@@ -1,4 +1,4 @@
-;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock-tests; -*-
+;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock-tests; -*-
 
 (in-package #:cl-mock-tests)
 

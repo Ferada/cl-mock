@@ -1,4 +1,4 @@
-;;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
+;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-mock; -*-
 
 (in-package #:cl-mock)
 
@@ -25,8 +25,8 @@ and executes it.  If no mock was found, no values are returned instead."
 
 (defun call-with-mocks (mock-bindings function &key (recordp T))
   "Calls FUNCTION with the given MOCK-BINDINGS established and returns
-its first return value, if any.  If RECORDP is set, all invocations will
-be recorded and returned as the second return value, else NIL."
+its return values as a LIST.  If RECORDP is set, all invocations will be
+recorded and returned as the second return value, else NIL."
   (let* ((mocks (mock-bindings-mocks mock-bindings))
          (functions (mapcar #'car mocks))
          (previous (mapcar #'maybe-fdefinition functions)))
@@ -41,9 +41,18 @@ be recorded and returned as the second return value, else NIL."
                mocks previous)
        (lambda ()
          (values
-          (funcall function)
+          (multiple-value-list
+           (funcall function))
           (invocations)))
        previous))))
+
+(defmacro with-mocks ((mock-bindings &key (recordp T)) form &body body)
+  `(multiple-value-bind (,values ,calls)
+       (call-with-mocks
+        ,mock-bindings
+        (lambda () ,form)
+        :recordp ,recordp)
+     ,@body))
 
 (defun register-mock (mock-bindings name)
   "Registers a mocked function under NAME.  The mocked function will
