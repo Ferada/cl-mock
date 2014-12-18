@@ -5,13 +5,13 @@
 (in-suite cl-mock)
 
 (def-test call-with-mocks.empty ()
-  (is (eq T (call-with-mocks
-             (make-mock-bindings)
-             (constantly T)))))
+  (is (equal '(T) (call-with-mocks
+                   (make-mock-bindings)
+                   (constantly T)))))
 
 (def-test call-with-mocks.discards-values ()
   (is (equal
-       '(1 NIL)
+       '((1 2 3) NIL)
        (multiple-value-list
         (call-with-mocks
          (make-mock-bindings)
