@@ -15,6 +15,8 @@
    #:dflet
 
    ;; mocking of regular functions
+   #:*previous*
+   #:*arguments*
    #:call-previous
    #:register-mock
    #:invocations

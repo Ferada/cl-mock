@@ -42,7 +42,9 @@ dynamic function rebinding):
 
     > (declaim (notinline foo bar))
     > (defun foo () 'foo)
-    > (defun bar () 'bar)
+    > (defun bar (&rest args)
+    >   (declare (ignore args))
+    >   'bar)
     > (with-mocks ()
     >   (answer (foo 1) 42)
     >   (answer foo 23)
@@ -77,6 +79,21 @@ function call will fail and that error is propagated upwards.
 `IF-CALLED` also has another option to push a binding to the front of
 the list, which (as of now) isn't available via `ANSWER` (and should be
 treated as subject to change anyway).
+
+Should you wish to run the previously defined function, use the function
+`CALL-PREVIOUS`.  If no arguments are passed it will use the current
+arguments from `*ARGUMENTS*`, if any.  Otherwise it will be called with
+the passed arguments instead.  For cases where explicitely calling it
+with no arguments is necessary, using `(funcall *previous*)` is still
+possible as well.
+
+    > (with-mocks ()
+    >   (answer foo `(was originally ,(funcall *previous*)))
+    >   (answer bar `(was originally ,(call-previous)))
+    >   (values
+    >    (foo "hello")
+    >    (bar "hello")))
+    > => (WAS ORIGINALLY FOO) (WAS ORIGINALLY BAR)
 
 The function `INVOCATIONS` may be used to retrieve all recorded
 invocations of mocks (so far); the optional argument can be used to
