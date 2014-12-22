@@ -10,7 +10,7 @@ version)."
   :license "Simplified BSD License"
   :version "1.0.0"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
-  :depends-on (#:cl-mock-basic #:closer-mop #:alexandria #:optima)
+  :depends-on (#:cl-mock-basic #:optima)
   :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests)))
   :perform (asdf:test-op :after (op c)
              (funcall (find-symbol (symbol-name '#:run!) '#:fiveam)

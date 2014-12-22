@@ -3,7 +3,7 @@
 (in-package #:cl-user)
 
 (defpackage #:cl-mock
-  (:use #:closer-common-lisp #:alexandria #:optima)
+  (:use #:closer-common-lisp #:alexandria)
   (:export
    ;; regular functions
    #:maybe-fdefinition

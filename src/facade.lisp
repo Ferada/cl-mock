@@ -25,7 +25,7 @@
                             for (form . rest) on forms
                             collect `(,(if rest i T) ,form)))))
                (if (listp call)
-                   `(match args
+                   `(optima:match args
                      ((list . ,(cdr call)) ,cases)
                      (_ (unhandled)))
                    cases))))))))
