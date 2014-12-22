@@ -4,71 +4,77 @@
 
 ;;; mocking of regular functions
 
-(defstruct mock-bindings
-  "Contains a set of mocked functions and their behaviour."
-  mocks)
+(defvar *mock-bindings*)
+(defvar *invocations*)
+(defvar *recordp*)
 
 (defvar *previous*)
 (defvar *arguments*)
+
+(defun invocations (&optional name)
+  (let ((invocations (car *invocations*)))
+    (if name
+        (remove name invocations :key #'car :test-not #'eq)
+        invocations)))
 
 (defun call-previous (&rest args)
   "Invokes the previous binding either with the current arguments or with
 the given ones.  Use *PREVIOUS*/*ARGUMENTS* directly in edge cases."
   (apply *previous* (or args *arguments*)))
 
-(defun find-and-invoke-mock (*previous* cases *arguments*)
+(defun find-and-invoke-mock (binding *arguments*)
   "Looks for a compatible mock (i.e. calls the TEST until one returns true)
 and executes it.  If no mock was found, no values are returned instead."
-  (dolist (case cases (values))
-    (when (ignore-errors (apply (car case) *arguments*))
-      (return (apply (cdr case) *arguments*)))))
+  (when *recordp*
+    (let ((record (list (cons (car binding) *arguments*))))
+      (if (null (car *invocations*))
+          (setf (cdr *invocations*)
+                (setf (car *invocations*) record))
+          (setf (cdr *invocations*)
+                (setf (cddr *invocations*) record)))))
+  (dolist (case (cdddr binding) (values))
+    (let ((*previous* (cadr binding)))
+      (catch 'unhandled
+        (return (apply case *arguments*))))))
 
-(defun call-with-mocks (mock-bindings function &key (recordp T))
-  "Calls FUNCTION with the given MOCK-BINDINGS established and returns
-its return values as a LIST.  If RECORDP is set, all invocations will be
-recorded and returned as the second return value, else NIL."
-  (let* ((mocks (mock-bindings-mocks mock-bindings))
-         (functions (mapcar #'car mocks))
-         (previous (mapcar #'maybe-fdefinition functions)))
-    (with-collector (invocations)
-      (call-with-function-bindings
-       functions
-       (mapcar (lambda (binding previous &aux (name (car binding)) (cases (cdr binding)))
-                 (lambda (&rest args)
-                   (when recordp
-                     (invocations (cons name args)))
-                   (find-and-invoke-mock previous cases args)))
-               mocks previous)
-       (lambda ()
-         (values
-          (multiple-value-list
-           (funcall function))
-          (invocations)))
-       previous))))
+(defun unhandled ()
+  (throw 'unhandled (values)))
 
-(defmacro with-mocks ((mock-bindings &key (recordp T)) form &body body)
-  `(multiple-value-bind (,values ,calls)
-       (call-with-mocks
-        ,mock-bindings
-        (lambda () ,form)
-        :recordp ,recordp)
-     ,@body))
-
-(defun register-mock (mock-bindings name)
+(defun register-mock (name)
   "Registers a mocked function under NAME.  The mocked function will
 return no values.  See IF-CALLED to add some behaviour to it."
-  (let ((found (member name (mock-bindings-mocks mock-bindings) :key #'car :test #'eq)))
+  (let ((found (member name *mock-bindings* :key #'car :test #'eq)))
     (or (car found)
-        (let ((binding (list name)))
-          (push binding (mock-bindings-mocks mock-bindings))
+        (let* ((binding (list name (maybe-fdefinition name) NIL))
+               (function (lambda (&rest arguments)
+                           (find-and-invoke-mock binding arguments))))
+          (setf (caddr binding) function)
+          (push binding *mock-bindings*)
+          (set-fdefinition name function)
           binding))))
 
-(defun if-called (mock-bindings name test function &key at-start)
-  "Registers a new binding to be called when the TEST function returns
-true.  If AT-START is set, the binding is put at the start of the bindings
-list instead.  Calls REGISTER-MOCK automatically."
-  (let ((binding (register-mock mock-bindings name))
-        (case (cons test function)))
+(defun if-called (name function &key at-start)
+  "Registers a new binding, which should return true if it handled the
+invocation.  If AT-START is set, the binding is put at the start of the
+bindings list instead.  Calls REGISTER-MOCK automatically."
+  (let ((binding (register-mock name)))
     (if at-start
-        (push case (cdr binding))
-        (setf (cdr binding) (append (cdr binding) (list case))))))
+        (push function (cdddr binding))
+        (setf (cdddr binding) (append (cdddr binding) (list function))))))
+
+(defun call-with-mocks (function &key ((:recordp *recordp*) T))
+  "Call FUNCTION with a new mocking context.  Invocations will be
+recorded if RECORDP is set (default true)."
+  (let (*mock-bindings*
+        (*invocations* (list NIL)))
+    (unwind-protect (funcall function)
+      (mapc (lambda (binding)
+              (set-or-unbind-fdefinition (car binding) (cadr binding)))
+            *mock-bindings*))))
+
+(defmacro with-mocks ((&key (recordp T)) &body body)
+  "Execute BODY in a new mocking context.  Invocations will be recorded
+if RECORDP is set (default true)."
+  `(call-with-mocks
+    (lambda () ,@body)
+    :recordp ,recordp))

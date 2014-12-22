@@ -1,6 +1,6 @@
 -*- mode: markdown; coding: utf-8-unix; -*-
 
-CL-MOCK - Mocking (generic) functions.
+CL-MOCK - Mocking functions.
 
 Copyright (C) 2013-14 Olof-Joachim Frahm
 
@@ -8,65 +8,92 @@ Release under a Simplified BSD license.
 
 Working, but unfinished.
 
-Should be portable thanks to [`CLOSER-MOP`][1].
+Should be portable.
 
 
 # INTRODUCTION
 
 This small library provides a way to replace the actual implementation
-of either regular or generic functions with mocks.  How to integrate
-this facility with a testing library is up to the user; the tests for
-the library are written in [`FIVEAM`][2] though, so most examples will
-take that into account.
+of either regular or generic functions with mocks.  On the one hand how
+to integrate this facility with a testing library is up to the user; the
+tests for the library are written in [`FIVEAM`][2] though, so most
+examples will take that into account.  On the other hand writing
+interactions for mocks usually relies on a bit of pattern matching,
+therefore the regular `CL-MOCK` package relies on [`OPTIMA`][3] to
+provide that facility instead of deferring to the user.  Should this be
+a concern a reduced system definition is available as `CL-MOCK-BASIC`,
+which excludes the definition of `ANSWER` and the dependency on
+[`OPTIMA`][3].
 
 Since it is pretty easy to just roll something like this on your own,
 the main purpose is to develop a nice (lispy, declarative) syntax to
 keep your tests readable and maintainable.
 
 Some parts may be used independently of the testing facilities,
-e.g. dynamic `FLET` and method bindings with `PROGM` may be of general
-interest.
+e.g. dynamic `FLET` may be of general interest.
 
 
-# MOCKING CONTEXT
+# MOCKING REGULAR FUNCTIONS
 
-In addition to having macros and functions to install bindings into the
-mocking context, the actual context object may be retrieved and passed
-around as well.  This might be useful for further analysis or other
-helpers.
+Let's say we have a function `FOO`, then we can replace it for testing
+by establishing a new mocking context and then specifying how the new
+function should behave (see below in **UTILITIES** for a more primitive
+dynamic function rebinding):
 
+    > (declaim (notinline foo bar))
+    > (defun foo () 'foo)
+    > (defun bar () 'bar)
+    > (with-mocks ()
+    >   (answer (foo 1) 42)
+    >   (answer foo 23)
+    >   (values
+    >    (eql 42 (foo 1))
+    >    (eql 23 (foo 'bar))))
+    > => T T
 
-# GENERIC FUNCTIONS
+The `ANSWER` macro has pattern matching (see [`OPTIMA`][3]) integrated.
+Therefore something like the following will now work as expected:
 
-Since behaviour isn't bound to classes, but to generic functions,
-creating new classes on the fly isn't particularly interesting.  If
-necessary, additional shortcuts will be added, but until then I don't
-see the need for this.  On the contrary, providing a way to temporarily
-supersede generic function bindings sounds like a more viable approach,
-especially with regards to (custom) method combinations.
+    > (with-mocks ()
+    >   (answer (foo x) (format T "Hello, ~A!" x))
+    >   (foo "world"))
+    > => "Hello, world!"
 
-Thus, the form `PROGM` is provided to bind a number of methods during
-the execution of its body:
+If you don't like `ANSWER` as it is, you can still use `IF-CALLED`
+directly.  Note however that unless `UNHANDLED` is called, the function
+always matches and the return value is directly returned again:
 
-    > (progm
-    >     '((baz NIL (list)))
-    >     '((lambda (list) list))
-    >   ...)
+    > (with-mocks ()
+    >   (if-called 'foo (lambda (x)
+    >                     (unhandled)
+    >                     (error "Not executed!")))
+    >   (if-called 'foo (lambda (x) (format T "Hello, ~A!" x)))
+    >   (foo "world"))
+    > => "Hello, world!"
 
-For example:
+Be especially careful to handle all given arguments, otherwise the
+function call will fail and that error is propagated upwards.
 
-    > (defclass foo () ())
-    > (defgeneric baz (foo)
-        (:method ((foo foo))
-          42))
-    > (progm '((baz NIL (list)))
-             '((lambda (list) list))
-        (values (baz (make-instance 'foo)) (baz '(1 2 3))))
-    > => 42
-    > => (1 2 3)
+`IF-CALLED` also has another option to push a binding to the front of
+the list, which (as of now) isn't available via `ANSWER` (and should be
+treated as subject to change anyway).
 
-This is implemented via [`CLOSER-MOP`][1], so compatiblity with that
-library is required.
+The function `INVOCATIONS` may be used to retrieve all recorded
+invocations of mocks (so far); the optional argument can be used to
+filter for a particular name:
+
+    > (with-mocks ()
+    >   (answer foo)
+    >   (foo "hello")
+    >   (foo "world")
+    >   (bar "test")
+    >   (invocations 'foo))
+    > => ((FOO "hello")
+    >     (FOO "world"))
+
+Currently there are no further predicates to check these values, this is
+however an area of investigation, so presumably either a macro like
+[`FIVEAM`][2]s `IS`, or regular predicates could appear in this place.
 
 
 # UTILITIES
@@ -97,3 +124,5 @@ standard `PROG`:
     > (OR) => 42, if FOO was inlined
 
 [1]: http://common-lisp.net/project/closer/closer-mop.html
+[2]: http://common-lisp.net/project/fiveam/
+[3]: https://github.com/m2ym/optima

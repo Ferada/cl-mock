@@ -3,12 +3,26 @@
 (in-package #:cl-user)
 
 (defpackage #:cl-mock
-  (:use #:closer-common-lisp #:alexandria)
-  (:import-from #:arnesi #:with-collector)
-  (:export ;; regular functions
-           #:progf
-           #:dflet
+  (:use #:closer-common-lisp #:alexandria #:optima)
+  (:export
+   ;; regular functions
+   #:maybe-fdefinition
+   #:set-fdefinition
+   #:set-or-unbind-fdefinition
+   #:call-with-function-bindings
 
-           ;; mocking of regular functions
-           ;; mocking of generic functions
-           ))
+   #:progf
+   #:dflet
+
+   ;; mocking of regular functions
+   #:call-previous
+   #:register-mock
+   #:invocations
+   #:if-called
+   #:unhandled
+   #:answer
+   #:call-with-mocks
+   #:with-mocks
+
+   ;; mocking of generic functions
+   ))

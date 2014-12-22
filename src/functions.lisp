@@ -18,14 +18,16 @@ it completely."
   (if value (set-fdefinition name value) (fmakunbound name)))
 
 (defun call-with-function-bindings (functions values function
-                                    &optional (previous (mapcar #'maybe-fdefinition functions)))
-  "Calls FUNCTION while temporarily binding all FUNCTIONS to VALUES.
-See PROGF and PROGV."
-  (unwind-protect
-       (progn
-         (mapc #'set-fdefinition functions values)
-         (funcall function))
-    (mapc #'set-or-unbind-fdefinition functions previous)))
+                                    &optional previous)
+  "Calls FUNCTION while temporarily binding all FUNCTIONS with the given
+names to VALUES.  See PROGF and PROGV.  If PREVIOUS is set, it has to
+be the list of original values for each function."
+  (let ((previous (or previous (mapcar #'maybe-fdefinition functions))))
+    (unwind-protect
+         (progn
+           (mapc #'set-fdefinition functions values)
+           (funcall function))
+      (mapc #'set-or-unbind-fdefinition functions previous))))
 
 (defmacro progf (functions values &body body)
   "Like PROGV, but for FUNCTIONS."

@@ -11,24 +11,37 @@
 (def-test dflet.calls-binding ()
   (dflet ((foo () 23))
     (is (eql 23 (foo)))))
+
+(declaim (inline foo/inline))
+(defun foo/inline ()
+  23)
+
+(def-test dflet.inline.works ()
+  "If a function is declared INLINE (and that request is honored), DFLET
+won't work."
+  (dflet ((foo/inline () 42))
+    (is (eql 23 (foo/inline)))))
 
 (def-test dflet.notinline.works ()
-  (declare (notinline foo bar))
-  (defun foo () 23)
-  (dflet ((foo () 42))
-    (is (eql 42 (foo)))))
+  "If a function is declared INLINE, but NOTINLINE is used locally,
+DFLET will work."
+  (declare (notinline foo/inline))
+  (dflet ((foo/inline () 42))
+    (is (eql 42 (foo/inline)))))
+
+(defun foo/mock (&optional (string "Hello, World!"))
+  (1+ (bar/mock string)))
+
+(defun bar/mock (string)
+  (length string))
 
 (def-test dflet.simple-mock ()
-  (defun foo (&optional (string "Hello, World!"))
-    (1+ (bar string)))
-  (defun bar (string)
-    (length string))
-  (dflet ((bar (string)
+  (dflet ((bar/mock (string)
             (cond
               ((equalp string "Hello, World!")
                42))))
-    (is (eql 43 (foo)))
-    (is (eql 43 (foo "HELLO, WORLD!")))))
+    (is (eql 43 (foo/mock)))
+    (is (eql 43 (foo/mock "HELLO, WORLD!")))))
 
 (def-test dflet.package-locks ()
   "Either we can rebind LIST, or an error occurs and the binding is not
@@ -39,30 +52,19 @@ modified."
       (error ()
         (is (eq #'list list))))))
 
+(defun foo/lock ()
+  23)
+
 (def-test dflet.package-locks.order.1 ()
-  (defun foo ()
-    23)
+  "Either we can rebind LIST, or an error occurs and both binding are
+restored."
   (let ((list #'list)
-        (foo #'foo))
+        (foo/lock #'foo/lock))
     (handler-case (dflet
-                      ((foo () 13)
+                      ((foo/lock () 13)
                        (list () 42))
                     (is (eql 42 (list)))
-                    (is (eql 13 (foo))))
+                    (is (eql 13 (foo/lock))))
       (error ()
         (is (eq #'list list))
-        (is (eq #'foo foo))))))
-
-(def-test dflet.package-locks.order.2 ()
-  (defun foo ()
-    23)
-  (let ((list #'list)
-        (foo #'foo))
-    (handler-case (dflet
-                      ((list () 42)
-                       (foo () 13))
-                    (is (eql 42 (list)))
-                    (is (eql 13 (foo))))
-      (error ()
-        (is (eq #'list list))
-        (is (eq #'foo foo))))))
+        (is (eq #'foo/lock foo/lock))))))

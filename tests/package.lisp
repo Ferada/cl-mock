@@ -6,8 +6,8 @@
   (:use #:cl #:cl-mock #:fiveam)
   (:import-from #:cl-mock
                 #:call-with-mocks
+                #:with-mocks
                 #:progm
-                #:make-mock-bindings
                 #:if-called
                 #:when-called
                 #:call-previous

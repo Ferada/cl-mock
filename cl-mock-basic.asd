@@ -2,20 +2,22 @@
 
 (in-package #:cl-user)
 
-(asdf:defsystem #:cl-mock
+(asdf:defsystem #:cl-mock-basic
   :description "Mocking library"
-  :long-description "Mocking library to test plain functions (extended
-version)."
+  :long-description "Mocking library to test plain functions."
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
   :license "Simplified BSD License"
   :version "1.0.0"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
-  :depends-on (#:cl-mock-basic #:closer-mop #:alexandria #:optima)
-  :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests)))
+  :depends-on (#:closer-mop #:alexandria)
+  :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests-basic)))
   :perform (asdf:test-op :after (op c)
              (funcall (find-symbol (symbol-name '#:run!) '#:fiveam)
                       (find-symbol (symbol-name '#:cl-mock) '#:cl-mock-tests)))
   :serial T
-  :components ((:module "src"
+  :components ((:static-file "README.md")
+               (:module "src"
                 :components
-                ((:file "facade")))))
+                ((:file "package")
+                 (:file "functions")
+                 (:file "mock")))))
