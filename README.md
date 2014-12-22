@@ -96,6 +96,53 @@ however an area of investigation, so presumably either a macro like
 [`FIVEAM`][2]s `IS`, or regular predicates could appear in this place.
 
 
+# EXAMPLES
+
+The following examples may give a better impression.
+
+Here we test a particular [`ECLASTIC`][4] method, `GET*`.  In order to
+replace the HTTP call with a supplied value, we use `ANSWER` with
+`HTTP-REQUEST` and return a pre-filled stream.  Afterwards both the
+number of `INVOCATIONS` and the actual returned values are checked.
+
+    (use-package '(#:cl-mock #:fiveam #:eclastic #:drakma #:puri))
+
+    (def-test search.empty ()
+      (let* ((events (make-instance '<type> :type "document" :index "index"
+                                            :host "localhost" :port 9292))
+             (text "{\"took\":3,\"timed_out\":false,\"_shards\":{\"total\":5,\
+    \"successful\":5,\"failed\":0},\"hits\":{\"total\":123,\"max_score\":1.0,\
+    \"hits\":[{\"_index\":\"index\",\"_type\":\"document\",\"_id\":\"12345\",\
+    \"_score\":1.0,\"_source\":{\"test\": \"Hello, World!\"}}]}}")
+             (stream (make-string-input-stream text)))
+        (with-mocks ()
+          (answer http-request
+            (values stream 200 NIL
+                    (parse-uri "http://localhost:9292/index/document/_search")
+                    stream NIL "OK"))
+          (let ((values (multiple-value-list
+                         (get* events (new-search NIL)))))
+            (is (eql 1 (length (invocations))))
+            (is (eql 1 (length (car values))))
+            (is-true (typep (caar values) '<document>))
+            (is (equal (cdr values)
+                       '(NIL (:hits 123
+                              :shards (:total 5 :failed 0 :successful 5)
+                              :timed-out NIL :took 3))))))))
+
+Of course, running this should produce no errors:
+
+    > (run! 'search.empty)
+    >
+    > Running test SEARCH.EMPTY ....
+    > Did 4 checks.
+    >    Pass: 4 (100%)
+    >    Skip: 0 ( 0%)
+    >    Fail: 0 ( 0%)
+    >
+    > => NIL
+
+
 # UTILITIES
 
 `DFLET` dynamically rebinds functions similar to `FLET`:
@@ -126,3 +173,4 @@ standard `PROG`:
 [1]: http://common-lisp.net/project/closer/closer-mop.html
 [2]: http://common-lisp.net/project/fiveam/
 [3]: https://github.com/m2ym/optima
+[4]: https://github.com/gschjetne/eclastic
