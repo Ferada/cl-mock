@@ -3,12 +3,4 @@
 (in-package #:cl-user)
 
 (defpackage #:cl-mock-tests
-  (:use #:cl #:cl-mock #:fiveam)
-  (:import-from #:cl-mock
-                #:call-with-mocks
-                #:with-mocks
-                #:progm
-                #:if-called
-                #:when-called
-                #:call-previous
-                #:register-mock))
+  (:use #:cl #:cl-mock #:fiveam))
