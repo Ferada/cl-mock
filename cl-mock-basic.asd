@@ -20,4 +20,5 @@
                 :components
                 ((:file "package")
                  (:file "functions")
+                 (:file "methods")
                  (:file "mock")))))

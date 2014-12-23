@@ -15,4 +15,5 @@
                 ((:file "package")
                  (:file "suite")
                  (:file "functions")
+                 (:file "methods")
                  (:file "mock")))))
