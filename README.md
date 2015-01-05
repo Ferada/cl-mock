@@ -10,6 +10,8 @@ Working, but unfinished.
 
 Should be portable.
 
+[![Build Status](https://travis-ci.org/Ferada/cl-mock.svg?branch=master)](https://travis-ci.org/Ferada/cl-mock)
+
 
 # INTRODUCTION
 
