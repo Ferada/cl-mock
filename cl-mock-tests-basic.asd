@@ -8,7 +8,7 @@
   :license "Simplified BSD License"
   :version "1.0.0"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
-  :depends-on (#:cl-mock #:fiveam)
+  :depends-on (#:cl-mock-basic #:fiveam)
   :serial T
   :components ((:module "tests"
                 :components
