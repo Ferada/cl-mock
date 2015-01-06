@@ -2,15 +2,22 @@
 
 CL-MOCK - Mocking functions.
 
-Copyright (C) 2013-14 Olof-Joachim Frahm
+Copyright (C) 2013-15 Olof-Joachim Frahm
 
 Release under a Simplified BSD license.
 
 Working, but unfinished.
 
-Should be portable.
-
 [![Build Status](https://travis-ci.org/Ferada/cl-mock.svg?branch=master)](https://travis-ci.org/Ferada/cl-mock)
+
+Portable to at least ABCL, Allegro CL (with one problem with inlining
+settings), SBCL, CCL and CLISP.  CMUCL possibly, but not tested on
+Travis CI.  ECL fails on Travis CI ([`OPTIMA`][3] fails there as well),
+but runs successfully on my own machine, so YMMV.  See the detailed
+reports at
+[https://travis-ci.org/Ferada/cl-mock](https://travis-ci.org/Ferada/cl-mock)
+for more information and [`CL-TRAVIS`][5], and [`.travis.yml`][6] for the
+setup.
 
 
 # INTRODUCTION
@@ -193,3 +200,5 @@ standard `PROG`:
 [2]: http://common-lisp.net/project/fiveam/
 [3]: https://github.com/m2ym/optima
 [4]: https://github.com/gschjetne/eclastic
+[5]: https://github.com/luismbo/cl-travis
+[6]: https://raw.githubusercontent.com/Ferada/cl-mock/master/.travis.yml
