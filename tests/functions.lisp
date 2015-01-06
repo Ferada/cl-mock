@@ -18,9 +18,11 @@
 
 (def-test dflet.inline.works ()
   "If a function is declared INLINE (and that request is honored), DFLET
-won't work."
+won't work.  Not a failure, since we can't force INLINE."
   (dflet ((foo/inline () 42))
-    (is (eql 23 (foo/inline)))))
+    (if (eql 23 (foo/inline))
+        (pass "INLINE declaration honored, so DFLET fails")
+        (skip "INLINE declaration not honored, so DFLET works"))))
 
 (def-test dflet.notinline.works ()
   "If a function is declared INLINE, but NOTINLINE is used locally,
