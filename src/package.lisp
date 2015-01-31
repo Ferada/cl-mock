@@ -27,4 +27,6 @@
    #:with-mocks
 
    ;; mocking of generic functions
+   #:progm
+   #:progm*
    ))

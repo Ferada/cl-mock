@@ -41,17 +41,38 @@ and executes it.  If no mock was found, no values are returned instead."
 (defun unhandled ()
   (throw 'unhandled (values)))
 
-(defun register-mock (name)
+(defun register-mock (name &key method)
   "Registers a mocked function under NAME.  The mocked function will
 return no values.  See IF-CALLED to add some behaviour to it."
   (let ((found (member name *mock-bindings* :key #'car :test #'eq)))
     (or (car found)
-        (let* ((binding (list name (maybe-fdefinition name) NIL))
-               (function (lambda (&rest arguments)
-                           (find-and-invoke-mock binding arguments))))
-          (setf (caddr binding) function)
-          (push binding *mock-bindings*)
-          (set-fdefinition name function)
+        (let* ((fdefinition (maybe-fdefinition name))
+               (binding (list name fdefinition NIL)))
+          #+(or)
+          (when fdefinition
+            (when (and (typep fdefinition '(and function (not generic-function)))
+                       method)
+              (warn "Rebinding regular function ~S to generic function." name))
+            (when (and (typep fdefinition 'generic-function)
+                       (not method))
+              (warn "Rebinding generic function ~S to regular function." name)))
+          (if method
+              (let* ((qualifiers (car method))
+                     (specializers-form (cadr method))
+                     (specializers (mapcar #'classify specializers-form))
+                     (method (find-method fdefinition qualifiers specializers NIL)))
+                (ensure-method fdefinition
+                               `(lambda (list)
+                                  (let ((*arguments* (list list)))
+                                    (when *recordp*
+                                      (record-invocation (cons ',name *arguments*)))
+                                    (values)))
+                               :qualifiers qualifiers))
+              (let ((function (lambda (&rest arguments)
+                      (find-and-invoke-mock binding arguments))))
+                (setf (caddr binding) function)
+                (push binding *mock-bindings*)
+                (set-fdefinition name function)))
           binding))))
 
 (defun if-called (name function &key at-start)

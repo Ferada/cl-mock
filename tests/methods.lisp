@@ -12,7 +12,7 @@
     42))
 
 (def-test gf.simple ()
-  (cl-mock::progm
+  (progm
       '((baz NIL (list)))
       '((lambda (list) list))
     (is (equal '(1 2 3) (baz '(1 2 3))))
@@ -20,7 +20,7 @@
     (is (eql 42 (baz (make-instance 'foo))))))
 
 (def-test gf.overwrite ()
-  (cl-mock::progm
+  (progm
       '((baz NIL (foo)))
       '((lambda (foo) 23))
     (is (eql 23 (baz (make-instance 'foo)))))
