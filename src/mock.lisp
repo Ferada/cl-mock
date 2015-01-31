@@ -22,16 +22,17 @@
 the given ones.  Use *PREVIOUS*/*ARGUMENTS* directly in edge cases."
   (apply *previous* (or args *arguments*)))
 
+(defun record-invocation (record &aux (record (list record)))
+  (setf (cdr *invocations*)
+        (if (null (car *invocations*))
+            (setf (car *invocations*) record)
+            (setf (cddr *invocations*) record))))
+
 (defun find-and-invoke-mock (binding *arguments*)
   "Looks for a compatible mock (i.e. calls the TEST until one returns true)
 and executes it.  If no mock was found, no values are returned instead."
   (when *recordp*
-    (let ((record (list (cons (car binding) *arguments*))))
-      (if (null (car *invocations*))
-          (setf (cdr *invocations*)
-                (setf (car *invocations*) record))
-          (setf (cdr *invocations*)
-                (setf (cddr *invocations*) record)))))
+    (record-invocation (cons (car binding) *arguments*)))
   (dolist (case (cdddr binding) (values))
     (let ((*previous* (cadr binding)))
       (catch 'unhandled
