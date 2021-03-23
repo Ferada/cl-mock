@@ -6,7 +6,7 @@
   :description "Tests for CL-MOCK (extended version)"
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
   :license "Simplified BSD License"
-  :version "1.0.0"
+  :version "1.0.1"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
   :depends-on (#:cl-mock #:cl-mock-tests-basic)
   :serial T

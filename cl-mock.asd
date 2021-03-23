@@ -8,9 +8,9 @@
 version)."
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
   :license "Simplified BSD License"
-  :version "1.0.0"
-  #+asdf-unicode :encoding #+asdf-unicode :utf-8
-  :depends-on (#:cl-mock-basic #:optima)
+  :version "1.0.1"
+-unicode :encoding #+asdf-unicode :utf-8
+  :depends-on (#:cl-mock-basic #:trivia)
   :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests)))
   :perform (asdf:test-op :after (op c)
              (funcall (find-symbol (symbol-name '#:run!) '#:fiveam)
