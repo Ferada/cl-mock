@@ -7,9 +7,9 @@
   :long-description "Mocking library to test plain functions."
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
   :license "AGPL-3+"
-  :version "1.0.0"
+  :version "1.1.0"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
-  :depends-on (#:closer-mop #:alexandria)
+  :depends-on (#:closer-mop #:alexandria #:bordeaux-threads)
   :in-order-to ((asdf:test-op (asdf:load-op #:cl-mock-tests-basic)))
   :perform (asdf:test-op :after (op c)
              (funcall (find-symbol (symbol-name '#:run!) '#:fiveam)

@@ -8,6 +8,8 @@
 (defvar *invocations*)
 (defvar *recordp*)
 
+(defvar *invocations-lock* (bt:make-lock))
+
 (defvar *previous*)
 (defvar *arguments*)
 
@@ -23,10 +25,11 @@ the given ones.  Use *PREVIOUS*/*ARGUMENTS* directly in edge cases."
   (apply *previous* (or args *arguments*)))
 
 (defun record-invocation (record &aux (record (list record)))
-  (setf (cdr *invocations*)
-        (if (null (car *invocations*))
-            (setf (car *invocations*) record)
-            (setf (cddr *invocations*) record))))
+  (bt:with-lock-held (*invocations-lock*)
+    (setf (cdr *invocations*)
+          (if (null (car *invocations*))
+              (setf (car *invocations*) record)
+              (setf (cddr *invocations*) record)))))
 
 (defun find-and-invoke-mock (binding *arguments*)
   "Looks for a compatible mock (i.e. calls the TEST until one returns true)
@@ -63,11 +66,12 @@ bindings list instead.  Calls REGISTER-MOCK automatically."
         (push function (cdddr binding))
         (setf (cdddr binding) (append (cdddr binding) (list function))))))
 
-(defun call-with-mocks (function &key ((:recordp *recordp*) T))
+(defun call-with-mocks (function &key ((:recordp recordp) T))
   "Call FUNCTION with a new mocking context.  Invocations will be
 recorded if RECORDP is set (default true)."
-  (let (*mock-bindings*
-        (*invocations* (list NIL)))
+  (let (*mock-bindings*)
+    (setf *invocations* (list NIL))
+    (setf *recordp* recordp)
     (unwind-protect (funcall function)
       (mapc (lambda (binding)
               (set-or-unbind-fdefinition (car binding) (cadr binding)))
