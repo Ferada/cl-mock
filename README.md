@@ -23,7 +23,7 @@ Working, but unfinished.
 
 Portable to at least ABCL, Allegro CL (with one problem with inlining
 settings), SBCL, CCL and CLISP.  CMUCL possibly, but not tested on
-Travis CI.  ECL fails on Travis CI ([`OPTIMA`][3] fails there as well),
+Travis CI.  ECL fails on Travis CI ([`TRIVIA`][3] fails there as well),
 but runs successfully on my own machine, so YMMV.  See the detailed
 reports at
 [https://travis-ci.org/Ferada/cl-mock](https://travis-ci.org/Ferada/cl-mock)
@@ -39,11 +39,11 @@ to integrate this facility with a testing library is up to the user; the
 tests for the library are written in [`FIVEAM`][2] though, so most
 examples will take that into account.  On the other hand writing
 interactions for mocks usually relies on a bit of pattern matching,
-therefore the regular `CL-MOCK` package relies on [`OPTIMA`][3] to
+therefore the regular `CL-MOCK` package relies on [`TRIVIA`][3] to
 provide that facility instead of deferring to the user.  Should this be
 a concern a reduced system definition is available as `CL-MOCK-BASIC`,
 which excludes the definition of `ANSWER` and the dependency on
-[`OPTIMA`][3].
+[`TRIVIA`][3].
 
 Since it is pretty easy to just roll something like this on your own,
 the main purpose is to develop a nice (lispy, declarative) syntax to
@@ -73,7 +73,7 @@ dynamic function rebinding):
     >    (eql 23 (foo 'bar))))
     > => T T
 
-The `ANSWER` macro has pattern matching (see [`OPTIMA`][3]) integrated.
+The `ANSWER` macro has pattern matching (see [`TRIVIA`][3]) integrated.
 Therefore something like the following will now work as expected:
 
     > (with-mocks ()
@@ -209,7 +209,7 @@ standard `PROG`:
 
 [1]: http://common-lisp.net/project/closer/closer-mop.html
 [2]: http://common-lisp.net/project/fiveam/
-[3]: https://github.com/m2ym/optima
+[3]: https://github.com/guicho271828/trivia
 [4]: https://github.com/gschjetne/eclastic
 [5]: https://github.com/luismbo/cl-travis
 [6]: https://raw.githubusercontent.com/Ferada/cl-mock/master/.travis.yml
