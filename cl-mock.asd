@@ -1,7 +1,7 @@
 ;; -*- mode: lisp; syntax: common-lisp; coding: utf-8-unix; package: cl-user; -*-
 
 (in-package #:cl-user)
-
+
 (asdf:defsystem #:cl-mock
   :description "Mocking library"
   :long-description "Mocking library to test plain functions (extended version)."
