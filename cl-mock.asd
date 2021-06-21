@@ -6,7 +6,7 @@
   :description "Mocking library"
   :long-description "Mocking library to test plain functions (extended version)."
   :author "Olof-Joachim Frahm <olof@macrolet.net>"
-  :license "Simplified BSD License"
+  :license "AGPL-3+"
   :version "1.0.1"
   #+asdf-unicode :encoding #+asdf-unicode :utf-8
   :depends-on (#:cl-mock-basic #:trivia)
